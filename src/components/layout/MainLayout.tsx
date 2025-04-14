@@ -3,6 +3,7 @@ import { ReactNode, useState } from 'react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import { useLocation } from 'react-router-dom';
+import Chatbot from '../chatbot/Chatbot';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -32,6 +33,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           </div>
         </main>
       </div>
+      
+      {/* Add Chatbot component */}
+      <Chatbot />
     </div>
   );
 };
