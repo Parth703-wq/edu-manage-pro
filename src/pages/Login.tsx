@@ -28,7 +28,7 @@ const Login = () => {
             <GraduationCap className="h-8 w-8 text-college-purple" />
           </div>
           <h2 className="mt-4 text-2xl font-bold text-white">
-            EduManage Pro
+            GEC Bharuch
           </h2>
           <p className="mt-2 text-sm text-white opacity-80">
             College Management System
