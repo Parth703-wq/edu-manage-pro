@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -86,6 +85,26 @@ const dailyAttendance = {
   ]
 };
 
+// Sample student-specific attendance for the logged-in student
+const studentAttendance = {
+  "3": { // Student ID 3 (Rahul Mehta)
+    overall: 78,
+    monthly: 83,
+    subjects: [
+      { name: "Computer Programming", faculty: "Prof. Patel", total: 12, attended: 10, percentage: 83 },
+      { name: "Data Structures", faculty: "Prof. Kumar", total: 10, attended: 8, percentage: 80 },
+      { name: "Engineering Mathematics", faculty: "Prof. Sharma", total: 8, attended: 6, percentage: 75 },
+      { name: "Digital Systems", faculty: "Prof. Mehta", total: 6, attended: 4, percentage: 67 },
+      { name: "Engineering Physics", faculty: "Prof. Das", total: 6, attended: 4, percentage: 65 },
+    ],
+    daily: [
+      { date: "2025-04-10", subject: "Computer Programming", status: "absent" },
+      { date: "2025-04-11", subject: "Data Structures", status: "present" },
+      { date: "2025-04-12", subject: "Engineering Mathematics", status: "present" },
+    ]
+  }
+};
+
 const Attendance = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -94,6 +113,11 @@ const Attendance = () => {
   const [selectedSubject, setSelectedSubject] = useState("Computer Programming");
   const [selectedSection, setSelectedSection] = useState("A");
   const [todayAttendance, setTodayAttendance] = useState<any[]>([]);
+
+  // Determine if user is student, faculty or admin
+  const isStudent = user?.role === 'student';
+  const isFaculty = user?.role === 'faculty';
+  const isAdmin = user?.role === 'admin';
 
   // Fetch today's attendance data
   const fetchAttendanceData = (selectedDate: Date) => {
@@ -132,29 +156,34 @@ const Attendance = () => {
     });
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Attendance Management</h1>
-          <p className="text-muted-foreground">Track and manage student attendance</p>
-        </div>
-        
-        {user?.role === 'admin' && (
-          <div className="mt-4 md:mt-0 flex space-x-2">
-            <Button variant="outline" onClick={generateReport}>
-              <Download className="mr-2 h-4 w-4" />
-              Download Report
-            </Button>
-          </div>
-        )}
-      </div>
+  // Load student's own attendance data if they are a student
+  useEffect(() => {
+    if (isStudent && user) {
+      // In a real app, you would fetch the student's attendance data based on their ID
+      // For now, we're using a dummy student with ID 3
+      // This would normally be user.id
+    }
+  }, [isStudent, user]);
 
+  // Render different attendance views based on user role
+  const renderAttendanceContent = () => {
+    if (isStudent) {
+      // Student can only see their own attendance
+      return renderStudentAttendanceView();
+    } else {
+      // Faculty and Admin can see all attendance options
+      return renderFullAttendanceView();
+    }
+  };
+
+  // Render full attendance view for faculty and admin
+  const renderFullAttendanceView = () => {
+    return (
       <Tabs defaultValue="daily" className="space-y-4">
         <TabsList>
           <TabsTrigger value="daily">Daily Attendance</TabsTrigger>
           <TabsTrigger value="overall">Overall Report</TabsTrigger>
-          {user?.role === 'faculty' && (
+          {isFaculty && (
             <TabsTrigger value="mark">Mark Attendance</TabsTrigger>
           )}
         </TabsList>
@@ -351,7 +380,7 @@ const Attendance = () => {
           </Card>
         </TabsContent>
         
-        {user?.role === 'faculty' && (
+        {isFaculty && (
           <TabsContent value="mark">
             <Card>
               <CardHeader>
@@ -456,9 +485,17 @@ const Attendance = () => {
           </TabsContent>
         )}
       </Tabs>
-      
-      {user?.role === 'student' && (
-        <Card className="mt-6">
+    );
+  };
+
+  // Render student-specific attendance view
+  const renderStudentAttendanceView = () => {
+    // Use student ID 3 as an example
+    const studentData = studentAttendance["3"];
+    
+    return (
+      <div className="space-y-6">
+        <Card>
           <CardHeader>
             <CardTitle>Your Attendance Overview</CardTitle>
             <CardDescription>Current semester attendance summary</CardDescription>
@@ -472,10 +509,12 @@ const Attendance = () => {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Overall Attendance</p>
-                    <p className="text-xl font-bold">88%</p>
+                    <p className="text-xl font-bold">{studentData.overall}%</p>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">37 out of 42 classes attended</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {Math.round((42 * studentData.overall) / 100)} out of 42 classes attended
+                </p>
               </div>
               
               <div className="flex flex-col justify-between p-4 border rounded-lg bg-muted/50">
@@ -485,7 +524,7 @@ const Attendance = () => {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">This Month</p>
-                    <p className="text-xl font-bold">83%</p>
+                    <p className="text-xl font-bold">{studentData.monthly}%</p>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">10 out of 12 classes attended</p>
@@ -498,10 +537,10 @@ const Attendance = () => {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Low Attendance Subjects</p>
-                    <p className="text-xl font-bold">1 Subject</p>
+                    <p className="text-xl font-bold">2 Subjects</p>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">Engineering Physics: 65%</p>
+                <p className="text-xs text-muted-foreground mt-2">Engineering Physics & Digital Systems</p>
               </div>
             </div>
             
@@ -519,68 +558,91 @@ const Attendance = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
+                    {studentData.subjects.map((subject, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>{subject.name}</TableCell>
+                        <TableCell>{subject.faculty}</TableCell>
+                        <TableCell>{subject.total}</TableCell>
+                        <TableCell>{subject.attended}</TableCell>
+                        <TableCell>
+                          <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            subject.percentage >= 75 
+                              ? 'bg-green-50 text-green-700' 
+                              : subject.percentage >= 70
+                                ? 'bg-yellow-50 text-yellow-700'
+                                : 'bg-red-50 text-red-700'
+                          }`}>
+                            {subject.percentage}%
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-4">Recent Attendance Record</h3>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell>Computer Programming</TableCell>
-                      <TableCell>Prof. Patel</TableCell>
-                      <TableCell>12</TableCell>
-                      <TableCell>11</TableCell>
-                      <TableCell>
-                        <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">
-                          92%
-                        </div>
-                      </TableCell>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Subject</TableHead>
+                      <TableHead>Status</TableHead>
                     </TableRow>
-                    <TableRow>
-                      <TableCell>Data Structures</TableCell>
-                      <TableCell>Prof. Kumar</TableCell>
-                      <TableCell>10</TableCell>
-                      <TableCell>9</TableCell>
-                      <TableCell>
-                        <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">
-                          90%
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Engineering Mathematics</TableCell>
-                      <TableCell>Prof. Sharma</TableCell>
-                      <TableCell>8</TableCell>
-                      <TableCell>7</TableCell>
-                      <TableCell>
-                        <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">
-                          88%
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Digital Systems</TableCell>
-                      <TableCell>Prof. Mehta</TableCell>
-                      <TableCell>6</TableCell>
-                      <TableCell>4</TableCell>
-                      <TableCell>
-                        <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">
-                          67%
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Engineering Physics</TableCell>
-                      <TableCell>Prof. Das</TableCell>
-                      <TableCell>6</TableCell>
-                      <TableCell>4</TableCell>
-                      <TableCell>
-                        <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700">
-                          65%
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {studentData.daily.map((record, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>{record.date}</TableCell>
+                        <TableCell>{record.subject}</TableCell>
+                        <TableCell>
+                          <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            record.status === 'present' 
+                              ? 'bg-green-50 text-green-700' 
+                              : 'bg-red-50 text-red-700'
+                          }`}>
+                            {record.status === 'present' ? (
+                              <Check className="w-3 h-3 mr-1" />
+                            ) : (
+                              <X className="w-3 h-3 mr-1" />
+                            )}
+                            {record.status === 'present' ? 'Present' : 'Absent'}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </div>
             </div>
           </CardContent>
         </Card>
-      )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Attendance Management</h1>
+          <p className="text-muted-foreground">Track and manage student attendance</p>
+        </div>
+        
+        {isAdmin && (
+          <div className="mt-4 md:mt-0 flex space-x-2">
+            <Button variant="outline" onClick={generateReport}>
+              <Download className="mr-2 h-4 w-4" />
+              Download Report
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {renderAttendanceContent()}
     </div>
   );
 };

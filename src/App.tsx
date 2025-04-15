@@ -10,11 +10,14 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Students from "./pages/Students";
+import Faculty from "./pages/Faculty";
 import Announcements from "./pages/Announcements";
 import Timetable from "./pages/Timetable";
 import Fees from "./pages/Fees";
 import Examinations from "./pages/Examinations";
 import Attendance from "./pages/Attendance";
+import Courses from "./pages/Courses";
+import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +42,18 @@ const App = () => (
               <Route path="/students" element={
                 <ProtectedRoute allowedRoles={['admin', 'faculty']}>
                   <Students />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/faculty" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <Faculty />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/courses" element={
+                <ProtectedRoute>
+                  <Courses />
                 </ProtectedRoute>
               } />
 
@@ -69,6 +84,12 @@ const App = () => (
               <Route path="/attendance" element={
                 <ProtectedRoute>
                   <Attendance />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/messages" element={
+                <ProtectedRoute>
+                  <Messages />
                 </ProtectedRoute>
               } />
               
