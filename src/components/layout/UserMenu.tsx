@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { ChevronDown, LogOut, Settings, User } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { Link } from 'react-router-dom';
 
 const UserMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,20 +35,22 @@ const UserMenu = () => {
             <div className="text-sm font-medium text-gray-900">{userName}</div>
             <div className="text-xs text-gray-500 capitalize">{userRole}</div>
           </div>
-          <a
-            href="/profile"
+          <Link
+            to="/profile"
             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            onClick={() => setIsOpen(false)}
           >
             <User className="mr-3 h-4 w-4 text-gray-500" />
             Your Profile
-          </a>
-          <a
-            href="/settings"
+          </Link>
+          <Link
+            to="/settings"
             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            onClick={() => setIsOpen(false)}
           >
             <Settings className="mr-3 h-4 w-4 text-gray-500" />
             Settings
-          </a>
+          </Link>
           <button
             onClick={logout}
             className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

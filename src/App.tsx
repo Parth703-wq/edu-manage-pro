@@ -18,6 +18,7 @@ import Examinations from "./pages/Examinations";
 import Attendance from "./pages/Attendance";
 import Courses from "./pages/Courses";
 import Messages from "./pages/Messages";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -90,6 +91,12 @@ const App = () => (
               <Route path="/messages" element={
                 <ProtectedRoute>
                   <Messages />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               } />
               
