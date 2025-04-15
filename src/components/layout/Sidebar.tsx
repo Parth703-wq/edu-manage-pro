@@ -127,7 +127,7 @@ const Sidebar = ({ open, setOpen }: SidebarProps) => {
               <div className="h-8 w-8 bg-white rounded-md flex items-center justify-center">
                 <GraduationCap className="h-6 w-6 text-college-purple" />
               </div>
-              <span className="ml-2 font-bold text-lg text-white">GECBHaruch</span>
+              <span className="ml-2 font-bold text-lg text-white">GEC Bharuch</span>
             </Link>
             <button
               onClick={() => setOpen(false)}

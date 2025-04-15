@@ -14,6 +14,7 @@ import Announcements from "./pages/Announcements";
 import Timetable from "./pages/Timetable";
 import Fees from "./pages/Fees";
 import Examinations from "./pages/Examinations";
+import Attendance from "./pages/Attendance";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +63,12 @@ const App = () => (
               <Route path="/examinations" element={
                 <ProtectedRoute>
                   <Examinations />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/attendance" element={
+                <ProtectedRoute>
+                  <Attendance />
                 </ProtectedRoute>
               } />
               
