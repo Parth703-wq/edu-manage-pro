@@ -2,12 +2,14 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { DollarSign, FileText, CreditCard, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
+import { BadgeIndianRupee, FileText, CreditCard, Calendar, CheckCircle, AlertCircle, Download, Send } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { Button } from '@/components/ui/button';
 
 const Fees = () => {
   const { user } = useAuth();
   const [selectedYear, setSelectedYear] = useState('2023-24');
+  const [activeAdminTab, setActiveAdminTab] = useState('overview');
   
   // Sample fee structure data
   const feeStructure = {
@@ -33,11 +35,333 @@ const Fees = () => {
   const upcomingDues = [
     { id: 'UD2024001', dueDate: '2024-05-15', description: 'First Installment (2024-25)', amount: 65000 },
   ];
+
+  // Sample fee collection statistics
+  const feeStats = {
+    totalCollected: 12500000,
+    pendingAmount: 3500000,
+    totalStudents: 1254,
+    paidStudents: 952,
+    pendingStudents: 302
+  };
+
+  // Sample department-wise fee collection
+  const departmentStats = [
+    { department: 'Computer Science', collected: 4500000, pending: 850000, students: 450 },
+    { department: 'Electrical Engineering', collected: 3200000, pending: 950000, students: 320 },
+    { department: 'Mechanical Engineering', collected: 2800000, pending: 680000, students: 280 },
+    { department: 'Civil Engineering', collected: 2000000, pending: 1020000, students: 204 }
+  ];
   
   // Calculate total paid and balance
   const totalFee = feeStructure[selectedYear]?.total || 0;
   const totalPaid = paymentHistory.reduce((sum, payment) => sum + payment.amount, 0);
   const balance = totalFee - totalPaid;
+
+  const renderAdminContent = () => {
+    switch(activeAdminTab) {
+      case 'overview':
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-white">
+                <CardContent className="pt-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                      <BadgeIndianRupee className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Collected</p>
+                      <h3 className="text-2xl font-bold">₹{feeStats.totalCollected.toLocaleString()}</h3>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white">
+                <CardContent className="pt-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="h-12 w-12 rounded-full bg-orange-100 flex items-center justify-center">
+                      <AlertCircle className="h-6 w-6 text-orange-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Pending Amount</p>
+                      <h3 className="text-2xl font-bold">₹{feeStats.pendingAmount.toLocaleString()}</h3>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white">
+                <CardContent className="pt-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                      <CheckCircle className="h-6 w-6 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Students Paid</p>
+                      <h3 className="text-2xl font-bold">{feeStats.paidStudents}/{feeStats.totalStudents}</h3>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Department Stats */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Department-wise Fee Collection</CardTitle>
+                <CardDescription>Overview of fees collected by department</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Department</TableHead>
+                      <TableHead>Students</TableHead>
+                      <TableHead>Collected (₹)</TableHead>
+                      <TableHead>Pending (₹)</TableHead>
+                      <TableHead>Collection Rate</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {departmentStats.map((dept, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{dept.department}</TableCell>
+                        <TableCell>{dept.students}</TableCell>
+                        <TableCell>{dept.collected.toLocaleString()}</TableCell>
+                        <TableCell>{dept.pending.toLocaleString()}</TableCell>
+                        <TableCell>
+                          {Math.round((dept.collected / (dept.collected + dept.pending)) * 100)}%
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      
+      case 'feeStructure':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Fee Structure Management</CardTitle>
+              <CardDescription>Configure fee structures for different academic years</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 mb-4">
+                  <select 
+                    className="px-3 py-2 border rounded-md"
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                  >
+                    <option value="2023-24">Academic Year 2023-24</option>
+                    <option value="2024-25">Academic Year 2024-25</option>
+                  </select>
+                  <Button variant="outline">Edit Structure</Button>
+                </div>
+                
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Fee Component</TableHead>
+                      <TableHead>Amount (₹)</TableHead>
+                      <TableHead>Description</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>Tuition Fee</TableCell>
+                      <TableCell>{feeStructure[selectedYear]?.tuitionFee?.toLocaleString()}</TableCell>
+                      <TableCell>Basic tuition fee for education</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Development Fee</TableCell>
+                      <TableCell>{feeStructure[selectedYear]?.developmentFee?.toLocaleString()}</TableCell>
+                      <TableCell>For infrastructure development</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Examination Fee</TableCell>
+                      <TableCell>{feeStructure[selectedYear]?.examFee?.toLocaleString()}</TableCell>
+                      <TableCell>For conducting exams and assessments</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Library Fee</TableCell>
+                      <TableCell>{feeStructure[selectedYear]?.libraryFee?.toLocaleString()}</TableCell>
+                      <TableCell>For library resources and maintenance</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Computer Lab Fee</TableCell>
+                      <TableCell>{feeStructure[selectedYear]?.computerLabFee?.toLocaleString()}</TableCell>
+                      <TableCell>For computer labs and IT infrastructure</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Sports & Cultural Fee</TableCell>
+                      <TableCell>{feeStructure[selectedYear]?.sportsFee?.toLocaleString()}</TableCell>
+                      <TableCell>For sports facilities and cultural events</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Miscellaneous</TableCell>
+                      <TableCell>{feeStructure[selectedYear]?.miscellaneous?.toLocaleString()}</TableCell>
+                      <TableCell>Other institutional expenses</TableCell>
+                    </TableRow>
+                    <TableRow className="font-bold bg-gray-50">
+                      <TableCell>Total</TableCell>
+                      <TableCell>{feeStructure[selectedYear]?.total?.toLocaleString()}</TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+                
+                <div className="flex justify-end space-x-2 mt-4">
+                  <Button variant="outline">
+                    <Download className="mr-2 h-4 w-4" />
+                    Export
+                  </Button>
+                  <Button>
+                    <Send className="mr-2 h-4 w-4" />
+                    Publish
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      
+      case 'reports':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Fee Reports</CardTitle>
+              <CardDescription>Generate and download fee collection reports</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Report Type</label>
+                    <select className="w-full rounded-md border-gray-300 shadow-sm focus:border-college-purple focus:ring-college-purple">
+                      <option>Collection Summary</option>
+                      <option>Department Wise</option>
+                      <option>Outstanding Dues</option>
+                      <option>Refunds</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Duration</label>
+                    <select className="w-full rounded-md border-gray-300 shadow-sm focus:border-college-purple focus:ring-college-purple">
+                      <option>Last 30 days</option>
+                      <option>Last Quarter</option>
+                      <option>Current Semester</option>
+                      <option>Custom Range</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Format</label>
+                    <select className="w-full rounded-md border-gray-300 shadow-sm focus:border-college-purple focus:ring-college-purple">
+                      <option>PDF</option>
+                      <option>Excel</option>
+                      <option>CSV</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-2">
+                  <Button>Generate Report</Button>
+                </div>
+                
+                <div className="border rounded-md p-4">
+                  <h3 className="font-medium mb-3">Recent Reports</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-md">
+                      <div>
+                        <span className="font-medium">Collection Summary - March 2024</span>
+                        <p className="text-sm text-gray-500">Generated on Apr 02, 2024</p>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </li>
+                    <li className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-md">
+                      <div>
+                        <span className="font-medium">Outstanding Dues - Winter Semester</span>
+                        <p className="text-sm text-gray-500">Generated on Mar 15, 2024</p>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+        
+      case 'notifications':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Notifications</CardTitle>
+              <CardDescription>Send reminders to students with pending dues</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Recipients</label>
+                    <select className="w-full rounded-md border-gray-300 shadow-sm focus:border-college-purple focus:ring-college-purple">
+                      <option>All Students with Pending Dues</option>
+                      <option>Computer Science Department</option>
+                      <option>Electrical Engineering Department</option>
+                      <option>Mechanical Engineering Department</option>
+                      <option>Civil Engineering Department</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Notification Type</label>
+                    <select className="w-full rounded-md border-gray-300 shadow-sm focus:border-college-purple focus:ring-college-purple">
+                      <option>Email</option>
+                      <option>SMS</option>
+                      <option>Both</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Message Template</label>
+                  <select className="w-full rounded-md border-gray-300 shadow-sm focus:border-college-purple focus:ring-college-purple mb-2">
+                    <option>General Payment Reminder</option>
+                    <option>Urgent Payment Notice</option>
+                    <option>Fee Deadline Extension</option>
+                    <option>Custom Message</option>
+                  </select>
+                  
+                  <textarea 
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-college-purple focus:ring-college-purple h-32"
+                    defaultValue="Dear [STUDENT_NAME], This is a reminder that your fee payment of ₹[AMOUNT] for [SEMESTER] is due on [DUE_DATE]. Please make the payment as soon as possible to avoid late fees. Regards, Finance Department, GEC Bharuch"
+                  />
+                </div>
+                
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline">Preview</Button>
+                  <Button>Send Notifications</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+        
+      default:
+        return <div>Select a tab to view content</div>;
+    }
+  };
   
   return (
     <div className="container mx-auto px-4 py-6">
@@ -51,7 +375,7 @@ const Fees = () => {
               <CardContent className="pt-6">
                 <div className="flex items-center space-x-3">
                   <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <DollarSign className="h-6 w-6 text-primary" />
+                    <BadgeIndianRupee className="h-6 w-6 text-primary" />
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Fee</p>
@@ -233,19 +557,40 @@ const Fees = () => {
       )}
       
       {user?.role === 'admin' && (
-        <Card>
-          <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Fee Management Tools</h2>
-            <p className="mb-4">As an administrator, you can access the fee management dashboard to:</p>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>View fee status for all students</li>
-              <li>Generate fee reports by department or batch</li>
-              <li>Send payment reminders</li>
-              <li>Update fee structures</li>
-              <li>Process refunds or adjustments</li>
-            </ul>
-          </CardContent>
-        </Card>
+        <div>
+          <div className="mb-6 bg-white p-4 rounded-lg shadow flex flex-wrap gap-2">
+            <Button 
+              variant={activeAdminTab === 'overview' ? 'default' : 'outline'} 
+              onClick={() => setActiveAdminTab('overview')}
+              className="flex items-center"
+            >
+              Overview
+            </Button>
+            <Button 
+              variant={activeAdminTab === 'feeStructure' ? 'default' : 'outline'} 
+              onClick={() => setActiveAdminTab('feeStructure')}
+              className="flex items-center"
+            >
+              Fee Structure
+            </Button>
+            <Button 
+              variant={activeAdminTab === 'reports' ? 'default' : 'outline'} 
+              onClick={() => setActiveAdminTab('reports')}
+              className="flex items-center"
+            >
+              Reports
+            </Button>
+            <Button 
+              variant={activeAdminTab === 'notifications' ? 'default' : 'outline'} 
+              onClick={() => setActiveAdminTab('notifications')}
+              className="flex items-center"
+            >
+              Notifications
+            </Button>
+          </div>
+          
+          {renderAdminContent()}
+        </div>
       )}
       
       {user?.role === 'faculty' && (
